@@ -41,7 +41,7 @@ class KbArticle < ActiveRecord::Base
 
     acts_as_searchable :columns => [ "#{table_name}.title", "#{table_name}.summary", "#{table_name}.content"],
                        :preload => [ :project ],
-                       :date_column => "#{table_name}.created_at"
+                       :date_column => "created_at"
   else
     acts_as_activity_provider :find_options => {:include => :project},
                               :author_key => :author_id,

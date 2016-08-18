@@ -13,11 +13,12 @@
 <% content_for :sidebar do %>
 <ul id="options">
   <% if @article.editable_by?(User.current) %>
-  <li><%= link_to l(:label_edit_article), { :controller => 'articles', :action => 'edit', :id => @article.id, :project_id => @project}, :class => 'icon icon-edit' %></li>
-  <li><%= link_to l(:label_delete_article), { :controller => 'articles', :action => 'destroy', :id => @article.id, :project_id => @project}, :confirm => l(:text_are_you_sure), :method => :delete, :class => 'icon icon-del' %></li>
+  <li><%= link_to l(:label_edit_article), edit_knowledgebase_article_path(@article.id, :project_id => @project), :class => 'icon icon-edit' %></li>
+  <li><%= link_to l(:label_delete_article), destroy_knowledgebase_article_path(@article.id, :project_id => @project), :confirm => l(:text_are_you_sure), :method => :delete, :class => 'icon icon-del' %></li>
   <% end %>
 
-		<li><%= link_to_if_authorized l(:label_new_comment), { :controller => "articles", :action => "comment", :article_id => @article.id, :project_id => @project}, :class => "icon icon-comment", :remote => true, :method => :get %></li>
+		<%#*<li><%= link_to_if_authorized l(:label_new_comment), knowledgebase_article_comment_path(@article.id, :project_id => @project), :class => "icon icon-comment", :remote => true, :method => :get %></li>%>
+		<li><%= link_to l(:label_new_comment), knowledgebase_article_comment_path(@article.id, :project_id => @project), :class => "icon icon-comment", :remote => true, :method => :get %></li>
 		<li>
       <%= render :partial => 'watchers/watchers', :locals => {:watched => @article} %>
     </li>
@@ -31,20 +32,20 @@
 	<div class="rating-title"><%= l(:title_tags) %></div>
 	<ul id="taglist">
 	  <% @article.tag_list.each do |tag| %>
-     <li><%= link_to tag, { :action => "tagged", :id => tag, :project_id => @project }, :class => "tag" %></li>
+     <li><%= link_to tag, knowledgebase_article_comment_path(tag, :project_id => @project), :class => "tag" %></li>
     <% end %>
 	</ul>
   <% end %>
 <% end %>
 
 <p id="category-crumbs" class="breadcrumb">
-	<%= link_to l(:label_kb_home), { :controller => 'articles', :action => 'index', :project_id => @project} %>
+	<%= link_to l(:label_kb_home), knowledgebase_articles_path(@article.id, :project_id => @project) %>
 	<% @article.category.ancestors.each do |ancestor| %>
 	&nbsp;&raquo;&nbsp;
-	<%= link_to ancestor.title, { :controller => 'categories', :action => 'show', :id => ancestor.id, :project_id => @project} %>
+	<%= link_to ancestor.title, knowledgebase_categories_path(ancestor.id, :project_id => @project) %>
 	<% end %>
 	&nbsp;&raquo;&nbsp;
-	<%= link_to @article.category.title, { :controller => 'categories', :action => 'show', :id => @article.category.id, :project_id => @project} %>
+	<%= link_to @article.category.title, knowledgebase_category_path(@article.category.id) %>
 </p>
 
 <div class="wiki"><h1><%= @article.title %></h1></div>

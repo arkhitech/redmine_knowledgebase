@@ -7,12 +7,12 @@ class CategoriesController < ApplicationController
   helper :watchers
   include WatchersHelper
 
-  before_filter :find_project_by_project_id, :authorize
-  before_filter :get_category, :only => [:show, :edit, :update, :destroy]
+  before_action :find_optional_project#, :authorize
+  before_action :get_category, only: [:show, :edit, :update, :destroy]
   accept_rss_auth :show
 
   rescue_from ActiveRecord::RecordNotFound, :with => :force_404
-
+  
   def show
 
     @articles = @category.articles.order("#{sort_column} #{sort_direction}")
@@ -21,8 +21,7 @@ class CategoriesController < ApplicationController
       @tag = params[:tag]
       @articles = @articles.tagged_with(@tag)
     end
-
-    @categories = @project.categories.where(:parent_id => nil)
+    @categories = category_scope.where(:parent_id => nil)
 
     @tags = @articles.tag_counts.sort { |a, b| a.name.downcase <=> b.name.downcase }
 
@@ -36,7 +35,7 @@ class CategoriesController < ApplicationController
   def new
     @category = KbCategory.new
     @parent_id = params[:parent_id]
-    @categories=@project.categories.all
+    @categories=category_scope.all
   end
 
   def create
@@ -46,7 +45,7 @@ class CategoriesController < ApplicationController
       # Test if the new category is a root category, and if more categories exist.
       # We check for a value > 1 because if this is the first entry, the category
       # count would be 1 (since the create operation already succeeded)
-      if !params[:root_category] and @project.categories.count > 1
+      if !params[:root_category] and category_scope.count > 1
         @category.move_to_child_of(KbCategory.find(params[:parent_id]))
       end
 
@@ -59,14 +58,14 @@ class CategoriesController < ApplicationController
 
   def edit
     @parent_id = @category.parent_id
-    @categories=@project.categories.all
+    @categories=category_scope.all
   end
 
   def destroy
-    @categories = @project.categories.all
+    @categories = category_scope.all
 
     # Do not allow deletion of categories with existing subcategories
-    @subcategories = @project.categories.where(:parent_id => @category.id)
+    @subcategories = category_scope.where(:parent_id => @category.id)
 
     if @subcategories.size != 0
       @articles = @category.articles.all
@@ -103,7 +102,7 @@ private
 #######
 
   def get_category
-    @category = @project.categories.find(params[:id])
+    @category = category_scope.find(params[:id])
   end
 
   def force_404

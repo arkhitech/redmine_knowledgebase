@@ -3,6 +3,13 @@ module KnowledgebaseHelper
   include KnowledgebaseSettingsHelper
   include ActionView::Helpers::NumberHelper
 
+  def category_scope
+    (@project && @project.categories) || KbCategory    
+  end
+  
+  def article_scope
+    (@project && article_scope) || KbArticle
+  end
   def format_article_summary(article, format, options = {})
     output = case format
     when "normal"

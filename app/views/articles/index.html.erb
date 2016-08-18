@@ -2,17 +2,19 @@
 
 <div class="contextual">
   <%= render :partial => "categories/jump_box" %>
-  <%= link_to_if_authorized l(:title_create_category), { :controller => 'categories', :action => 'new', :project_id => @project}, :class => 'icon icon-add' %>
-  <% if @project.categories.length > 0 %>	
-    <%= link_to_if_authorized l(:title_create_article), { :controller => 'articles', :action => 'new', :project_id => @project}, :class => 'icon icon-add' %>
+  <%#= link_to_if_authorized l(:title_create_category), new_knowledgebase_category_path(:project_id => @project), :class => 'icon icon-add' %>
+  <%= link_to l(:title_create_category), new_knowledgebase_category_path(:project_id => @project), :class => 'icon icon-add' %>
+  <% if category_scope.length > 0 %>	
+    <%#= link_to_if_authorized l(:title_create_article), new_knowledgebase_article_path(:project_id => @project), :class => 'icon icon-add' %>
+    <%= link_to l(:title_create_article), new_knowledgebase_article_path(:project_id => @project), :class => 'icon icon-add' %>
   <% end %>
 </div>
 
-<% if @project.categories.count == 0 %>
+<% if category_scope.count == 0 %>
   <h2><%= l(:knowledgebase_title) %></h2>
   <p class="nodata"><%= l(:message_no_categories) %></p>
   
-<% elsif @project.articles.count == 0 %>
+<% elsif article_scope.count == 0 %>
   <h2><%= l(:knowledgebase_title) %></h2>
   <p class="nodata"><%= l(:message_no_articles) %></p>
   
@@ -27,7 +29,8 @@
             <li><%= l(:label_overview_total_articles, :total_articles => @total_articles.to_i) %></li>
 
             <% if User.current.allowed_to?(:create_articles, @project) %>
-	    <li><%= link_to_if_authorized l(:label_overview_my_articles, :total_articles_by_me => @total_articles_by_me.to_i), { :controller => 'articles', :action => 'authored', :project_id => @project, :author_id => User.current.id} %></li>
+	    <%#*<li><%= link_to_if_authorized l(:label_overview_my_articles, :total_articles_by_me => @total_articles_by_me.to_i), authored_knowledgebase_article_path(:project_id => @project, :author_id => User.current.id) %></li>%>
+	    <li><%= link_to l(:label_overview_my_articles, :total_articles_by_me => @total_articles_by_me.to_i), authored_knowledgebase_article_path(:project_id => @project, :author_id => User.current.id) %></li>
             <% end %>
         </ul>
         </div>

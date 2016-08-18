@@ -8,49 +8,49 @@ class ArticlesController < ApplicationController
   helper :watchers
   include WatchersHelper
 
-  before_filter :find_project_by_project_id, :authorize
-  before_filter :get_article, :except => [:index, :new, :create, :preview, :comment, :tagged, :rate, :authored]
+  before_action :find_optional_project#, :authorize
+  before_action :get_article, except: [:index, :new, :create, :preview, :comment, :tagged, :rate, :authored]
 
   rescue_from ActionView::MissingTemplate, :with => :force_404
   rescue_from ActiveRecord::RecordNotFound, :with => :force_404
 
   ActiveRecord::ConnectionAdapters::Column.send(:alias_method, :type_cast, :type_cast_for_database)
-
+  
   def index
     summary_limit = redmine_knowledgebase_settings_value(:summary_limit).to_i
 
-    @total_categories = @project.categories.count
-    @total_articles = @project.articles.count
-    @total_articles_by_me = @project.articles.where(:author_id => User.current.id).count
+    @total_categories = category_scope.count
+    @total_articles = article_scope.count
+    @total_articles_by_me = article_scope.where(:author_id => User.current.id).count
 
-    @categories = @project.categories.where(:parent_id => nil)
+    @categories = category_scope.where(:parent_id => nil)
 
-    @articles_newest = @project.articles.order("created_at DESC").first(summary_limit)
-    @articles_latest = @project.articles.order("updated_at DESC").first(summary_limit)
-    @articles_popular = @project.articles.includes(:viewings).sort_by(&:view_count).reverse.first(summary_limit)
-    @articles_toprated = @project.articles.includes(:ratings).sort_by { |a| [a.rating_average, a.rated_count] }.reverse.first(summary_limit)
+    @articles_newest = article_scope.order("created_at DESC").first(summary_limit)
+    @articles_latest = article_scope.order("updated_at DESC").first(summary_limit)
+    @articles_popular = article_scope.includes(:viewings).sort_by(&:view_count).reverse.first(summary_limit)
+    @articles_toprated = article_scope.includes(:ratings).sort_by { |a| [a.rating_average, a.rated_count] }.reverse.first(summary_limit)
 
-    @tags = @project.articles.tag_counts.sort { |a, b| a.name.downcase <=> b.name.downcase }
+    @tags = article_scope.tag_counts.sort { |a, b| a.name.downcase <=> b.name.downcase }
   end
 
   def authored
 
     @author_id = params[:author_id]
-    @articles = @project.articles.where(:author_id => @author_id).order("#{KbArticle.table_name}.#{sort_column} #{sort_direction}")
+    @articles = article_scope.where(:author_id => @author_id).order("#{KbArticle.table_name}.#{sort_column} #{sort_direction}")
 
     if params[:tag]
       @tag = params[:tag]
       @articles = @articles.tagged_with(@tag)
     end
 
-    @categories = @project.categories.where(:parent_id => nil)
+    @categories = category_scope.where(:parent_id => nil)
 
     @tags = @articles.tag_counts.sort { |a, b| a.name.downcase <=> b.name.downcase }
   end
 
   def new
     @article = KbArticle.new
-    @categories = @project.categories.all
+    @categories = category_scope.all
     @default_category = params[:category_id]
     @article.category_id = params[:category_id]
     @article.version = params[:version]
@@ -71,7 +71,7 @@ class ArticlesController < ApplicationController
     @article.category_id = params[:category_id]
     @article.author_id = User.current.id
     @article.project_id = KbCategory.find(params[:category_id]).project_id
-    @categories = @project.categories.all
+    @categories = category_scope.all
     # don't keep previous comment
     @article.version_comments = params[:article][:version_comments]
     if @article.save
@@ -103,7 +103,7 @@ class ArticlesController < ApplicationController
       return false
     end
 
-    @categories=@project.categories.all
+    @categories=category_scope.all
 
     # don't keep previous comment
     @article.version_comments = nil
@@ -119,7 +119,7 @@ class ArticlesController < ApplicationController
 
     @article.updater_id = User.current.id
     params[:article][:category_id] = params[:category_id]
-    @categories = @project.categories.all
+    @categories = category_scope.all
     # don't keep previous comment
     @article.version_comments = nil
     @article.version_comments = params[:article][:version_comments]
@@ -181,9 +181,9 @@ class ArticlesController < ApplicationController
   def tagged
     @tag = params[:id]
     @list = if params[:sort] && params[:direction]
-      @project.articles.order("#{params[:sort]} #{params[:direction]}").tagged_with(@tag)
+      article_scope.order("#{params[:sort]} #{params[:direction]}").tagged_with(@tag)
     else
-      @project.articles.tagged_with(@tag)
+      article_scope.tagged_with(@tag)
     end
   end
 
@@ -233,7 +233,7 @@ private
   end
 
   def get_article
-    @article = @project.articles.find(params[:id])
+    @article = article_scope.find(params[:id])
   end
 
   def force_404

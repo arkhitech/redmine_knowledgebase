@@ -29,10 +29,7 @@
       <% end %>
 
       <td class="title">
-        <%= link_to article.title, { :controller => 'articles', 
-                                     :action => 'show', 
-                                     :id => article.id, 
-                                     :project_id => @project} %> 
+        <%= link_to article.title, knowledgebase_article_path(article.id, project_id: @project) %> 
         <% unless redmine_knowledgebase_settings_value(:disable_article_summaries) %>
           <br/> 
           <div class="summary">

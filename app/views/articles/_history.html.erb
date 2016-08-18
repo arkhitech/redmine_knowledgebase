@@ -1,6 +1,5 @@
 <div id="histtable">
-  <%= form_tag({:controller => 'articles', :action => 'diff',
-                :project_id => @project, :id => @article.id},
+  <%= form_tag(diff_knowledgebase_article_path(@article.id, project_id: @project),
                 :method => :get) do %>
   <table class="list wiki-page-versions">
   <thead><tr>

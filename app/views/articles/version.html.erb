@@ -4,13 +4,13 @@
 <% end %>
 
 <p id="category-crumbs" class="breadcrumb">
-	<%= link_to l(:label_kb_home), { :controller => 'articles', :action => 'index', :project_id => @project} %>
+	<%= link_to l(:label_kb_home), knowledgebase_articles_path(:project_id => @project) %>
 	<% @article.category.ancestors.each do |ancestor| %>
 	&nbsp;&raquo;&nbsp; 
-	<%= link_to ancestor.title, { :controller => 'categories', :action => 'show', :id => ancestor.id, :project_id => @project} %>
+	<%= link_to ancestor.title, knowledgebase_category_path(ancestor.id, :project_id => @project) %>
 	<% end %>
 	&nbsp;&raquo;&nbsp; 
-	<%= link_to @article.category.title, { :controller => 'categories', :action => 'show', :id => @article.category.id, :project_id => @project} %>
+	<%= link_to @article.category.title, knowledgebase_category_path(@article.category.id, :project_id => @project) %>
 </p>
 
 <% content_for :sidebar do %>
